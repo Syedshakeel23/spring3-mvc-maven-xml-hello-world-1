@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'BRANCH', defaultValue: 'origin/master', description: 'Branch to build')
+        string(name: 'BRANCH', defaultValue: 'master', description: 'Branch to build')
         booleanParam(defaultValue: false, description: 'Run Maven build?', name: 'mvn_build')
         booleanParam(defaultValue: false, description: 'Publish to Nexus?', name: 'publish_to_nexus')
     }
