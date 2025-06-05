@@ -41,38 +41,39 @@ pipeline {
         }
 
         stage("publish to nexus") {
-            steps {
-                script {
-                    if (params.publish_to_nexus) {
-                        pom = readMavenPom file: "pom.xml"
-                        filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
-                        echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                        artifactPath = filesByGlob[0].path
-                        artifactExists = fileExists artifactPath
+    steps {
+        script {
+            if (params.publish_to_nexus) {
+                def pom = readMavenPom file: "pom.xml"
+                def filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
+                echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                
+                def artifactPath = filesByGlob[0].path
+                def artifactExists = fileExists artifactPath
 
-                        if (artifactExists) {
-                            echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}"
-                            nexusArtifactUploader(
-                                nexusVersion: NEXUS_VERSION,
-                                protocol: NEXUS_PROTOCOL,
-                                nexusUrl: NEXUS_URL,
-                                groupId: pom.groupId,
-                                version: "${BUILD_NUMBER}",
-                                repository: NEXUS_REPOSITORY,
-                                credentialsId: NEXUS_CREDENTIAL_ID,
-                                artifacts: [
-                                    [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
-                                    [artifactId: pom.artifactId, classifier: '', file: "pom.xml", type: "pom"]
-                                ]
-                            )
-                        } else {
-                            error "*** File: ${artifactPath}, could not be found"
-                        }
-                    } else {
-                        echo "no build"
-                    }
+                if (artifactExists) {
+                    echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}"
+                    nexusArtifactUploader(
+                        nexusVersion: NEXUS_VERSION,
+                        protocol: NEXUS_PROTOCOL,
+                        nexusUrl: NEXUS_URL, // make sure there's no extra http:// in NEXUS_URL variable
+                        groupId: pom.groupId,
+                        version: "${BUILD_NUMBER}",
+                        repository: NEXUS_REPOSITORY,
+                        credentialsId: NEXUS_CREDENTIAL_ID,
+                        artifacts: [
+                            [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
+                            [artifactId: pom.artifactId, classifier: '', file: "pom.xml", type: "pom"]
+                        ]
+                    )
+                } else {
+                    error "*** File: ${artifactPath}, could not be found"
                 }
+            } else {
+                echo "Skipping Nexus publish as per parameters"
             }
         }
     }
+}
+}
 }
