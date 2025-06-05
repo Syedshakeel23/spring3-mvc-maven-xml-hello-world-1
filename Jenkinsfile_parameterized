@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                     if (params.mvn_build) {
-                        sh '/usr/share/maven/bin/mvn -Dmaven.test.failure.ignore clean package'
+                       sh "${tool 'maven_3.9.9'}/bin/mvn -Dmaven.test.failure.ignore clean package"
                     } else {
                         echo "no build"
                     }
