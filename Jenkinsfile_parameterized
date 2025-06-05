@@ -32,7 +32,7 @@ pipeline {
                 script {
                     
 				    // Let's clone the source
-                    git branch: "${params.BRANCH}", url: 'https://github.com/betawins/parametirize-job.git';
+                    git branch: "${params.BRANCH}", url: 'https://github.com/Syedshakeel23/spring3-mvc-maven-xml-hello-world-1.git';
                    
                 } 
             }
