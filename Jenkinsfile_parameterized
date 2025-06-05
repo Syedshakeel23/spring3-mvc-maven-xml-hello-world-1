@@ -15,7 +15,7 @@ pipeline {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "http://100.25.130.61:8088/"
-        NEXUS_REPOSITORY = "ncodeit-helloworld"
+        NEXUS_REPOSITORY = "Spring3"
         NEXUS_CREDENTIAL_ID = "nexus"
     }
 
