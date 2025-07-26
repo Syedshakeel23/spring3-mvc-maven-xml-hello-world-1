@@ -19,7 +19,7 @@ pipeline {
     stages {
         stage("Clone Code") {
             steps {
-                git url: 'https://github.com/betawins/spring3-mvc-maven-xml-hello-world-1.git'
+                git url: 'https://github.com/Syedshakeel23/spring3-mvc-maven-xml-hello-world-1.git'
             }
         }
 
