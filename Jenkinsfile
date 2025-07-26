@@ -6,7 +6,7 @@ pipeline {
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "3.85.5.89:8081"
+        NEXUS_URL = "204.236.252.196:8081"
         NEXUS_REPOSITORY = "spring3"
         NEXUS_CREDENTIAL_ID = "Nexus_server" // Add this in Jenkins Credentials
     }
