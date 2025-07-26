@@ -10,56 +10,49 @@ node {
     env.NEXUS_REPOSITORY = 'spring3'
     env.NEXUS_CREDENTIAL_ID = 'Nexus_server'
 
-    stage('Clone Code') {
-        git url: 'https://github.com/Syedshakeel23/spring3-mvc-maven-xml-hello-world-1.git'
-    }
+    boolean isSuccess = false
 
-    stage('Build WAR') {
-        sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore=true clean install"
-    }
+    try {
+        stage('Clone Code') {
+            git url: 'https://github.com/Syedshakeel23/spring3-mvc-maven-xml-hello-world-1.git'
+        }
 
-    stage('Upload to Nexus') {
-        script {
-            def pom = readMavenPom file: 'pom.xml'
-            def files = findFiles(glob: "target/*.${pom.packaging}")
+        stage('Build WAR') {
+            sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore=true clean install"
+        }
 
-            if (files.length == 0) {
-                error "❌ No ${pom.packaging} file found in target/"
-            }
-
-            def artifactPath = files[0].path
-
-            echo "📦 Uploading Artifact: ${artifactPath}"
-            echo "GroupId: ${pom.groupId}, ArtifactId: ${pom.artifactId}, Version: ${BUILD_NUMBER}"
+        stage('Upload to Nexus') {
+            def groupId = "com.ncodeit"
+            def artifactId = "ncodeit-hello-world"
+            def version = "${BUILD_NUMBER}"
+            def packaging = "war"
 
             nexusArtifactUploader(
                 nexusVersion: env.NEXUS_VERSION,
                 protocol: env.NEXUS_PROTOCOL,
                 nexusUrl: env.NEXUS_URL,
-                groupId: pom.groupId,
-                artifactId: pom.artifactId,
-                version: "${BUILD_NUMBER}",
+                groupId: groupId,
+                artifactId: artifactId,
+                version: version,
                 repository: env.NEXUS_REPOSITORY,
                 credentialsId: env.NEXUS_CREDENTIAL_ID,
                 artifacts: [
-                    [
-                        artifactId: pom.artifactId,
-                        classifier: '',
-                        file: artifactPath,
-                        type: pom.packaging
-                    ],
-                    [
-                        artifactId: pom.artifactId,
-                        classifier: '',
-                        file: 'pom.xml',
-                        type: 'pom'
-                    ]
+                    [artifactId: artifactId, classifier: '', file: "target/${artifactId}.${packaging}", type: packaging],
+                    [artifactId: artifactId, classifier: '', file: "pom.xml", type: "pom"]
                 ]
             )
         }
-    }
 
-    stage('Done') {
-        echo '✅ Build & Upload completed!'
+        isSuccess = true
+    } catch (e) {
+        echo "Build failed: ${e}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    } finally {
+        if (isSuccess) {
+            stage('Success') {
+                echo "🎉 Build and Upload to Nexus completed successfully!"
+            }
+        }
     }
 }
