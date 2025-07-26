@@ -6,7 +6,7 @@ node {
     def NEXUS_VERSION = "nexus3"
     def NEXUS_PROTOCOL = "http"
     def NEXUS_URL = "204.236.252.196:8081"
-    def NEXUS_REPOSITORY = "spring3"
+    def NEXUS_REPOSITORY = "spring-3-scripted"
     def NEXUS_CREDENTIAL_ID = "Nexus_server"
 
     stage("Clone Code") {
