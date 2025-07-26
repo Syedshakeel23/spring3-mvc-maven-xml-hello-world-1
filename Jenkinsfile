@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven "MVN_HOME" // This must match the Maven installation name in Jenkins → Global Tool Configuration
+        maven "MVN_HOME"
     }
 
     environment {
@@ -13,7 +13,11 @@ pipeline {
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "204.236.252.196:8081"
         NEXUS_REPOSITORY = "spring3"
-        NEXUS_CREDENTIAL_ID = "Nexus_server" // You must define this ID in Jenkins Credentials
+        NEXUS_CREDENTIAL_ID = "Nexus_server"
+        
+        GROUP_ID = "com.mycompany"
+        ARTIFACT_ID = "spring3-mvc-maven-xml-hello-world"
+        PACKAGING = "war"
     }
 
     stages {
@@ -32,36 +36,35 @@ pipeline {
         stage("Publish to Nexus") {
             steps {
                 script {
-                    def pom = readMavenPom file: 'pom.xml'
-                    def files = findFiles(glob: "target/*.${pom.packaging}")
-                    
+                    def files = findFiles(glob: "target/*.${env.PACKAGING}")
+
                     if (files.length == 0) {
-                        error "No ${pom.packaging} file found in target/"
+                        error "No ${env.PACKAGING} file found in target/"
                     }
 
                     def artifactPath = files[0].path
 
                     echo "📦 Uploading Artifact: ${artifactPath}"
-                    echo "GroupId: ${pom.groupId}, ArtifactId: ${pom.artifactId}, Version: ${BUILD_NUMBER}"
+                    echo "GroupId: ${env.GROUP_ID}, ArtifactId: ${env.ARTIFACT_ID}, Version: ${BUILD_NUMBER}"
 
                     nexusArtifactUploader(
-                        nexusVersion: NEXUS_VERSION,
-                        protocol: NEXUS_PROTOCOL,
-                        nexusUrl: NEXUS_URL,
-                        groupId: pom.groupId,
-                        artifactId: pom.artifactId,
+                        nexusVersion: env.NEXUS_VERSION,
+                        protocol: env.NEXUS_PROTOCOL,
+                        nexusUrl: env.NEXUS_URL,
+                        groupId: env.GROUP_ID,
+                        artifactId: env.ARTIFACT_ID,
                         version: "${BUILD_NUMBER}",
-                        repository: NEXUS_REPOSITORY,
-                        credentialsId: NEXUS_CREDENTIAL_ID,
+                        repository: env.NEXUS_REPOSITORY,
+                        credentialsId: env.NEXUS_CREDENTIAL_ID,
                         artifacts: [
                             [
-                                artifactId: pom.artifactId,
+                                artifactId: env.ARTIFACT_ID,
                                 classifier: '',
                                 file: artifactPath,
-                                type: pom.packaging
+                                type: env.PACKAGING
                             ],
                             [
-                                artifactId: pom.artifactId,
+                                artifactId: env.ARTIFACT_ID,
                                 classifier: '',
                                 file: 'pom.xml',
                                 type: 'pom'
