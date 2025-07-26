@@ -1,57 +1,35 @@
 node {
-    // Set environment manually
-    env.JAVA_HOME = '/usr/lib/jvm/java-17-amazon-corretto.x86_64'
-    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-
-    def nexusVersion = "nexus3"
-    def nexusProtocol = "http"
-    def nexusUrl = "204.236.252.196:8081"
-    def nexusRepository = "spring3"
-    def nexusCredentialId = "Nexus_server"
-
-    def groupId = "com.ncodeit"
-    def artifactId = "ncodeit-hello-world"
-    def packaging = "war"
-    def version = "${env.BUILD_NUMBER}"
-    def artifactFile = "target/${artifactId}-${version}.${packaging}"
-
     stage('Clone Code') {
-        git url: 'https://github.com/Syedshakeel23/spring3-mvc-maven-xml-hello-world-1.git'
+        git 'https://github.com/Syedshakeel23/spring3-mvc-maven-xml-hello-world-1.git'
     }
 
     stage('Build WAR') {
-        sh 'mvn -Dmaven.test.failure.ignore=true clean install'
+        // Define Maven tool
+        def mvnHome = tool name: 'MVN_HOME', type: 'hudson.tasks.Maven$MavenInstallation'
+
+        // Use mvnHome/bin/mvn
+        sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore=true clean install"
     }
 
-    stage('Publish to Nexus') {
-        echo "📦 Uploading Artifact: ${artifactFile}"
-        echo "GroupId: ${groupId}, ArtifactId: ${artifactId}, Version: ${version}"
-
+    stage('Upload Artifact to Nexus') {
         nexusArtifactUploader(
-            nexusVersion: nexusVersion,
-            protocol: nexusProtocol,
-            nexusUrl: nexusUrl,
-            groupId: groupId,
-            artifactId: artifactId,
-            version: version,
-            repository: nexusRepository,
-            credentialsId: nexusCredentialId,
+            nexusVersion: 'nexus3',
+            protocol: 'http',
+            nexusUrl: '204.236.252.196:8081',
+            groupId: 'com.mycompany',
+            version: '16',
+            repository: 'spring3',
+            credentialsId: 'Nexus_server',
             artifacts: [
-                [
-                    artifactId: artifactId,
-                    classifier: '',
-                    file: artifactFile,
-                    type: packaging
-                ],
-                [
-                    artifactId: artifactId,
-                    classifier: '',
-                    file: 'pom.xml',
-                    type: 'pom'
-                ]
+                [artifactId: 'spring3-mvc-maven-xml-hello-world',
+                 classifier: '',
+                 file: 'target/ncodeit-hello-world.war',
+                 type: 'war'],
+                [artifactId: 'spring3-mvc-maven-xml-hello-world',
+                 classifier: '',
+                 file: 'pom.xml',
+                 type: 'pom']
             ]
         )
     }
-
-    echo '✅ Build & Publish completed!'
 }
